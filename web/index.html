@@ -1,9 +1,105 @@
 <html>
     <head>
+        <!--
+        Look, alright. I know this site looks like it's straight out of 1999.
+        I am an engineer in training and in my heart. I am not a designer (regrettably).
+        If you want to help me make this look better, please reach out
+        -->
+
         <title>SwitchStack</title>
+
+        <style>
+            .fig-wrap {
+                margin: auto;
+                width: 50%;
+                border: 3px solid black;
+                padding: 10px;
+                justify-content: center;
+            }
+
+            .foot-wrap {
+                margin: auto;
+                width: 50%;
+                border: 0px solid black;
+                padding: 10px;
+                justify-content: center;
+            }
+
+            b + ol {
+              margin-top: 0px;
+            }
+
+        </style>
+
+        <script>
+            function stackChangeHandler(form) {
+                // TODO verify client-side if it's a valid link.
+                // We already verify server-side, but  we should do it here too.
+                let link = form.value;
+
+                let stack = document.getElementById("stack");
+                stack.innerHTML = "http://www.switchstack.org/" + link;
+
+                let disp = document.getElementById("output");
+                if(link == "") {
+                    disp.setAttribute("hidden", true);
+                } else {
+                    disp.removeAttribute("hidden");
+                }
+            }
+
+            function copyHandler() {
+                let copyText = document.getElementById("stack").innerHTML;
+                
+                //TODO can't do this until we get HTTPS working
+                //navigator.clipboard.writeText(copyText);   
+                
+                // Jank copy bullshit. TODO Remove ASAP 
+                /*---------------------------------------------*/
+                let textArea = document.createElement("textarea");
+                textArea.value = copyText;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Unable to copy to clipboard', err);
+                }
+                document.body.removeChild(textArea);
+                /*---------------------------------------------*/
+
+                let butt = document.getElementById("copier");
+                butt.innerHTML = "Copied!"
+            }
+
+            function outFunc() {
+                let tooltip = document.getElementById("tooltip");
+                tooltip.innerHTML = "Copy to clipboard";
+            }
+        </script>
     </head>
 
     <body>
-        <h1>SwitchStack</h1>
+        <div class="fig-wrap">
+            <h1 style="margin-top: 0px; margin-bottom: 0px">SwitchStack!</h1>
+            <b>Enter any full Substack link:</b><br>
+            <input onkeyup=stackChangeHandler(this) type="text" placeholder="https://example.substack.com/p/link-to-your-post" size="40">
+        </div>
+        <div hidden id="output" class="fig-wrap">
+            Your SwitchStack link is <b id="stack"></b><br>
+            <button id="copier" onclick="copyHandler()">Click to Copy</button>
+        </div>
+        <div class="foot-wrap">
+            <b>How to use:</b>
+            <ol>
+                <li>Find the link to the Substack page that you want to share on Tw*tter.</li>
+                <li>Copy it into the box above.</li>
+                <li>Click on the button to copy your SwitchStack link.</li>
+                <li>Share your SwitchStack link on Tw*tter.</li>
+                <li>Tw*tter's API will only indirectly get thumbnail metadata while users get forwarded to Substack.</li>
+            </ol>
+            Site isn't working how it's supposed to? Questions? Comments? Suggestions?<br><i>Shoot me an email at brianhjlee@proton.me!</i>
+        </div>
     </body>
 </html>
