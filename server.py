@@ -19,9 +19,6 @@ def filetoString(path):
     in_file.close()
     return data
 
-def isSubstack(url):
-    return True
-
 def getItem(full, pattern):
     match = pattern.search(full)
     return match.group(1)
@@ -99,7 +96,6 @@ class SwitchServer(BaseHTTPRequestHandler):
         content = content.replace("TITLE_PLACEHOLDER", title)
         content = content.replace("DESC_PLACEHOLDER", description)
         content = content.replace("IMG_PLACEHOLDER", image)
-        print(content)
         self.wfile.write(bytes(content, "utf-8"))
 
 if __name__ == "__main__":        
