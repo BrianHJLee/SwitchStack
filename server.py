@@ -29,6 +29,11 @@ class SwitchServer(BaseHTTPRequestHandler):
     imagePattern = re.compile(r'property="twitter:image"\s*content="(.+?)"')
 
     def do_GET(self):
+        if("https://substackcdn.com/image/fetch" in self.path):
+            url = self.path.replace("/", "", 1)
+            self.serve_image(url)
+            return
+
         if(self.path == "/"):
             self.serve_home()
             return
@@ -95,8 +100,21 @@ class SwitchServer(BaseHTTPRequestHandler):
         content = filetoString("web/meta.html")
         content = content.replace("TITLE_PLACEHOLDER", title)
         content = content.replace("DESC_PLACEHOLDER", description)
-        content = content.replace("IMG_PLACEHOLDER", image)
+        content = content.replace("IMG_PLACEHOLDER", "http://www.switchstack.org/" + image)
         self.wfile.write(bytes(content, "utf-8"))
+    
+    def serve_image(self, path):
+        try:
+            response = requests.get(path)
+        except:
+            self.serve_421()
+            return
+
+        self.send_response(response.status_code)
+        for field in response.headers:
+            self.send_header(field, response.headers[field])
+        self.end_headers()
+        self.wfile.write(response.content)
 
 if __name__ == "__main__":        
     webServer = HTTPServer((hostName, serverPort), SwitchServer)
