@@ -2,6 +2,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 #import ssl
 import requests
 import validators
+import re
 
 hostName = "104.248.6.49"
 serverPort = 80
@@ -12,10 +13,24 @@ def fileToBytes(path):
     in_file.close()
     return data
 
+def filetoString(path):
+    in_file = open(path, "r")
+    data = in_file.read()
+    in_file.close()
+    return data
+
 def isSubstack(url):
     return True
 
+def getItem(full, pattern):
+    match = pattern.search(full)
+    return match.group(1)
+
 class SwitchServer(BaseHTTPRequestHandler):
+    titlePattern = re.compile(r'property="twitter:title"\s*content="(.+?)"')
+    descriptionPattern = re.compile(r'property="twitter:description"\s*content="(.+?)"')
+    imagePattern = re.compile(r'property="twitter:image"\s*content="(.+?)"')
+
     def do_GET(self):
         if(self.path == "/"):
             self.serve_home()
@@ -37,13 +52,13 @@ class SwitchServer(BaseHTTPRequestHandler):
             self.serve_421()
             return
 
-        if("Twitterbot" in self.headers):
-            # TODO Return page with Twitter card
-            self.serve_home()
-            pass
+        if("Twitterbot" in str(self.headers)):
+            title = getItem(response.text, self.titlePattern)
+            description = getItem(response.text, self.descriptionPattern)
+            image = getItem(response.text, self.imagePattern)
+            self.serve_metadata(title, description, image)
         else:
             self.serve_redirect(url)
-            pass
         
     def send_response(self, code, message=None):
         self.log_request(code)
@@ -75,6 +90,17 @@ class SwitchServer(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "text/html")
         self.end_headers()
         self.wfile.write(fileToBytes("web/302.html"))
+
+    def serve_metadata(self, title, description, image):
+        self.send_response(200)
+        self.send_header("content-type", "text/html")
+        self.end_headers()
+        content = filetoString("web/meta.html")
+        content = content.replace("TITLE_PLACEHOLDER", title)
+        content = content.replace("DESC_PLACEHOLDER", description)
+        content = content.replace("IMG_PLACEHOLDER", image)
+        print(content)
+        self.wfile.write(bytes(content, "utf-8"))
 
 if __name__ == "__main__":        
     webServer = HTTPServer((hostName, serverPort), SwitchServer)
