@@ -1,4 +1,4 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 #import ssl
 import requests
 import validators
@@ -117,7 +117,7 @@ class SwitchServer(BaseHTTPRequestHandler):
         self.wfile.write(response.content)
 
 if __name__ == "__main__":        
-    webServer = HTTPServer((hostName, serverPort), SwitchServer)
+    webServer = ThreadingHTTPServer((hostName, serverPort), SwitchServer)
     
     # HTTPS stuff
     '''
